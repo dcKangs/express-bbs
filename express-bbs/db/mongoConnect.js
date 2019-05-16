@@ -22,5 +22,5 @@ module.exports = () => {
         connect();
     });
     
-    require('../schemas/article');
+    //require('../schemas/article');
 }

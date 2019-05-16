@@ -1,22 +1,26 @@
 var express = require('express');
 var router = express.Router();
 
-const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://admin:junsan@cluster0-1dynr.mongodb.net/test?retryWrites=true";
-
+const Article = require('../schemas/article')
 
 /* /articles 전체보기 */
-router.get('/', (req, res) => {
-  const client = new MongoClient(uri, { useNewUrlParser: true });
-  let responseJson = null;
-  client.connect(err => {
-    const collection = client.db("test").collection("articles");
-    // perform actions on the collection object
-    const cursor = collection.find({});
-    responseJson = cursor;
-    client.close();
-  });
-  res.json(responseJson);
+router.get('/', async (req, res, next) => {
+
+  try {
+      const articles = await Article.find({});
+      res.json(articles);
+  } catch (err) {
+      res.json(err);
+      next();
+  }
+  // Article.find({})
+  //   .then((articles) => {
+  //       res.json(articles);
+  //   })
+  //   .catch((err) => {
+  //       res.json(err);
+  //   });
+  // res.json(responseJson);
 });
 
 /* /articles/:id 상세보기 */
