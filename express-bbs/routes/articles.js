@@ -24,56 +24,65 @@ router.get('/', async (req, res, next) => {
 });
 
 /* /articles/:id 상세보기 */
-router.get('/:articleNum', (req, res) => {
-  const articleNum = req.params.articleNum;
-  res.send(articleNum + '번 글 보기');
+router.get('/:articleNum', async (req, res, next) => {
+  const articleNum = parseInt(req.params.articleNum);
+
+  try {
+    const article = await Article.find({_id : articleNum});
+    res.send(article);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
 });
 
 /* /articles 등록 */
-router.post('/', (req, res) => {
+router.post('/', async (req, res, next) => {
   const articleJsonFromClient = req.body;
-  const client = new MongoClient(uri, { useNewUrlParser: true });
-  client.connect(err => {
-    const collection = client.db("test").collection("articles");
-    // perform actions on the collection object
-    collection.insertOne(articleJsonFromClient);
-    client.close();
-  });
-  res.send(articleJsonFromClient);
+
+  try {
+    //const article = new Article(articleJsonFromClient);
+    const article = new Article({
+      _id : articleJsonFromClient._id,
+      title : articleJsonFromClient.title,
+      content : articleJsonFromClient.content
+    });
+    const saved = await article.save();
+    res.json(saved);
+  } catch(err) {
+    console.log(err);
+    next(err);
+  }
+  
 });
 
 /* /articles/:id 수정 */
-router.put('/:articleNum', (req, res) => {
-  const articleNum = req.params.articleNum;
+router.put('/:articleNum', async (req, res, next) => {
+  const articleNum = parseInt(req.params.articleNum);
   const articleJsonFromClient = req.body;
-  const client = new MongoClient(uri, { useNewUrlParser: true });
-  client.connect(err => {
-    const collection = client.db("test").collection("articles");
-    // perform actions on the collection object
-    collection.updateOne(
-        { _id : parseInt(articleNum) },
-        {
-          $set : articleJsonFromClient,
-          //$set: { content : 'cm', arthor : 'test' }
-          $currentDate :  { lastModified : true }
-        }
-    );
-    client.close();
-  });
-  res.send(articleNum + '번 글 수정');
+
+  try {
+    const modifiedRes = await Article.updateOne({_id : articleNum}, articleJsonFromClient);
+    res.send(modifiedRes);
+  } catch(err) {
+    console.log(err.message);
+    next(err);
+  }
+  
 });
 
 /* /articles/:id 삭제 */
-router.delete('/:articleNum', (req, res) => {
+router.delete('/:articleNum', async (req, res, next) => {
   const articleNum = parseInt(req.params.articleNum);
-  const client = new MongoClient(uri, { useNewUrlParser: true });
-  client.connect(err => {
-    const collection = client.db("test").collection("articles");
-    // perform actions on the collection object
-    collection.deleteOne({_id : articleNum});
-    client.close();
-  });
-  res.send(articleNum + '번 글 삭제');
+  
+  try {
+    const deleteRes = await Article.deleteOne({_id : articleNum});
+    res.send(deleteRes);
+  } catch(err) {
+    console.log(err.message);
+    next(err);
+  }
+
 });
 
 module.exports = router;
