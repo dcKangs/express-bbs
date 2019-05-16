@@ -10,7 +10,7 @@ const articleRouter = require('./routes/articles');
 
 const app = express();
 
-// 몽구스에서 몽고디비와 커넥션 설정
+// 몽구스에서 몽고디비와 커넥션 설정T
 connect();
 
 app.use(logger('dev'));
